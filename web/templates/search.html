@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="glass-card">
+            <div class="glass-header">
+                <h4>Búsqueda de Activos</h4>
+            </div>
+            <div class="glass-body">
+                <p>Utiliza los formularios a continuación para buscar activos por diferentes criterios.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de Activos -->
+    <div class="col-md-6">
+        <div class="glass-card">
+            <div class="glass-header">
+                <h4>Búsqueda por IDs</h4>
+            </div>
+            <form method="POST" action="{{ url_for('search') }}">
+                {{ asset_form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ asset_form.ids.label }}
+                    {{ asset_form.ids(class="form-control", value=session.get('uploaded_ids', '')) }}
+                    <small class="text-muted">{{ asset_form.ids.description }}</small>
+                </div>
+                
+                <div class="form-group">
+                    {{ asset_form.exclude.label }}
+                    {{ asset_form.exclude(class="form-control") }}
+                    <small class="text-muted">{{ asset_form.exclude.description }}</small>
+                </div>
+                
+                <div class="form-group mb-3">
+                    {{ asset_form.components.label }}
+                    <div class="checkbox-group">
+                        {% for value, label in asset_form.components.choices %}
+                        <div class="checkbox">
+                            <input type="checkbox" name="components" value="{{ value }}" id="comp_{{ value }}"> 
+                            <label for="comp_{{ value }}">{{ label }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    {{ asset_form.include_info.label }}
+                    {{ asset_form.include_info(class="form-control") }}
+                </div>
+
+                <!-- Nuevas opciones de componentes -->
+                <div class="component-options">
+                    <h5>Opciones de Componentes</h5>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            {{ asset_form.disable_join.label }}
+                            {{ asset_form.disable_join() }}
+                        </div>
+                        <div class="checkbox-item">
+                            {{ asset_form.combine_cpu_ram.label }}
+                            {{ asset_form.combine_cpu_ram() }}
+                        </div>
+                        <div class="checkbox-item">
+                            {{ asset_form.all_data.label }}
+                            {{ asset_form.all_data() }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ asset_form.filename.label }}
+                    {{ asset_form.filename(class="form-control") }}
+                    <small class="form-text text-muted">{{ asset_form.filename.description }}</small>
+                </div>
+
+                <button type="submit" name="submit_assets" class="btn btn-primary mt-3">Buscar Activos</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Formulario de Búsqueda -->
+    <div class="col-md-6">
+        <div class="glass-card">
+            <div class="glass-header">
+                <h4>Búsqueda por Criterios</h4>
+            </div>
+            <form method="POST" action="{{ url_for('search') }}">
+                {{ search_form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ search_form.search_type.label }}
+                    {{ search_form.search_type(class="form-control") }}
+                </div>
+                
+                <div class="form-group">
+                    {{ search_form.search_value.label }}
+                    {{ search_form.search_value(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ search_form.filename.label }}
+                    {{ search_form.filename(class="form-control") }}
+                    <small class="form-text text-muted">{{ search_form.filename.description }}</small>
+                </div>
+                
+                <button type="submit" name="submit_search" class="btn btn-primary">Buscar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de Resultados -->
+{% if results %}
+<div class="glass-card mt-4">
+    <div class="glass-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Resultados</h4>
+            {% if results %}
+            <form method="POST" class="d-inline">
+                {{ search_form.csrf_token }}
+                <input type="hidden" name="download" value="true">
+                {% if search_form.search_type.data %}
+                    <input type="hidden" name="search_type" value="{{ search_form.search_type.data }}">
+                    <input type="hidden" name="search_value" value="{{ search_form.search_value.data or '' }}">
+                    <input type="hidden" name="filename" value="{{ search_form.filename.data or '' }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" name="submit_search" class="btn btn-success">
+                        Descargar Excel
+                    </button>
+                {% else %}
+                    <input type="hidden" name="ids" value="{{ asset_form.ids.data or '' }}">
+                    <input type="hidden" name="exclude" value="{{ asset_form.exclude.data or '' }}">
+                    <input type="hidden" name="filename" value="{{ asset_form.filename.data or '' }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {% for component in asset_form.components.data or [] %}
+                    <input type="hidden" name="components" value="{{ component }}">
+                    {% endfor %}
+                    {% for info in asset_form.include_info.data or [] %}
+                    <input type="hidden" name="include_info" value="{{ info }}">
+                    {% endfor %}
+                    <input type="hidden" name="disable_join" value="{{ 'y' if asset_form.disable_join.data else '' }}">
+                    <input type="hidden" name="combine_cpu_ram" value="{{ 'y' if asset_form.combine_cpu_ram.data else '' }}">
+                    <input type="hidden" name="all_data" value="{{ 'y' if asset_form.all_data.data else '' }}">
+                    <button type="submit" name="submit_assets" class="btn btn-success">
+                        Descargar Excel
+                    </button>
+                {% endif %}
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        {% if search_form.search_type.data == 'list_locations' %}
+            <div class="location-tree">
+                {%- for item in results -%}
+                    <div class="tree-node" data-level="{{ (item.text.count('│') + item.text.count('├') + item.text.count('└')) }}">{{ item.text }}</div>
+                {%- endfor -%}
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            {% for column in results[0].keys() %}
+                            <th>{{ column }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in results %}
+                        <tr>
+                            {% for value in row.values() %}
+                            <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %} 

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="glass-card">
+            <div class="glass-header">
+                <h4>Cargar Archivo de IDs</h4>
+            </div>
+            <div class="glass-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-group">
+                        {{ form.file.label }}
+                        {{ form.file(class="form-control") }}
+                        <small class="text-muted">{{ form.file.description }}</small>
+                        {% if form.file.errors %}
+                            {% for error in form.file.errors %}
+                                <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+                
+                <div class="mt-4">
+                    <h5>Formato del archivo:</h5>
+                    <p>El archivo debe contener IDs separados por comas, uno por línea. Por ejemplo:</p>
+                    <pre class="bg-light p-3 rounded">21,22,40,69,72,79,139,149,150,151,153,255,256,257,258,259,267,346,348</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

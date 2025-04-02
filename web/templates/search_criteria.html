@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="glass-card">
+            <div class="glass-header">
+                <h4><i class="fas fa-filter me-2"></i>Búsqueda de Activos por Criterios</h4>
+            </div>
+            <div class="glass-body">
+                <p>Utiliza este formulario para realizar búsquedas avanzadas filtrando por diversos criterios y atributos.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de Búsqueda -->
+    <div class="col-md-12">
+        <div class="glass-card">
+            <div class="glass-header">
+                <h4>Búsqueda por Criterios</h4>
+            </div>
+            <form method="POST" action="{{ url_for('search_criteria') }}">
+                {{ search_form.hidden_tag() }}
+                
+                <div class="form-group mb-3">
+                    {{ search_form.search_type.label }}
+                    {{ search_form.search_type(class="form-control") }}
+                </div>
+                
+                <div class="form-group mb-3">
+                    {{ search_form.search_value.label }}
+                    {{ search_form.search_value(class="form-control") }}
+                </div>
+
+                <div class="form-group mb-3">
+                    {{ search_form.filename.label }}
+                    {{ search_form.filename(class="form-control") }}
+                    <small class="form-text text-muted">{{ search_form.filename.description }}</small>
+                </div>
+                
+                <button type="submit" name="submit_search" class="btn btn-primary">Buscar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de Resultados -->
+{% if results %}
+<div class="glass-card mt-4">
+    <div class="glass-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Resultados</h4>
+            <form method="POST" class="d-inline">
+                {{ search_form.csrf_token }}
+                <input type="hidden" name="download" value="true">
+                <input type="hidden" name="search_type" value="{{ search_form.search_type.data }}">
+                <input type="hidden" name="search_value" value="{{ search_form.search_value.data or '' }}">
+                <input type="hidden" name="filename" value="{{ search_form.filename.data or '' }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" name="submit_search" class="btn btn-success">
+                    <i class="fas fa-download me-2"></i>Descargar Excel
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="glass-body">
+        {% if search_form.search_type.data == 'list_locations' %}
+            <div class="location-tree">
+                {%- for item in results -%}
+                    <div class="tree-node" data-level="{{ (item.text.count('│') + item.text.count('├') + item.text.count('└')) }}">{{ item.text }}</div>
+                {%- endfor -%}
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            {% for column in results[0].keys() %}
+                            <th>{{ column }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in results %}
+                        <tr>
+                            {% for value in row.values() %}
+                            <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %} 

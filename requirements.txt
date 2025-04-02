@@ -1,0 +1,12 @@
+python-dotenv==1.1.0
+requests==2.31.0
+colorama==0.4.6
+pandas==2.1.1
+openpyxl==3.1.2
+tqdm==4.66.1
+flask==2.3.3
+flask-bootstrap==3.3.7.1
+wtforms==3.0.1
+flask-wtf==1.2.1
+email-validator==2.1.0.post1
+gunicorn==21.2.0

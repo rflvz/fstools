@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="glass-card">
+            <div class="glass-header">
+                <h4><i class="fas fa-fingerprint me-2"></i>Búsqueda de Activos por ID</h4>
+            </div>
+            <div class="glass-body">
+                <p>Utiliza este formulario para buscar activos específicos por sus identificadores únicos.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de Activos -->
+    <div class="col-md-12">
+        <div class="glass-card">
+            <div class="glass-header">
+                <h4>Búsqueda por IDs</h4>
+            </div>
+            <form method="POST" action="{{ url_for('search_id') }}">
+                {{ asset_form.hidden_tag() }}
+                
+                <div class="form-group mb-3">
+                    {{ asset_form.ids.label }}
+                    {{ asset_form.ids(class="form-control", value=session.get('uploaded_ids', '')) }}
+                    <small class="text-muted">{{ asset_form.ids.description }}</small>
+                </div>
+                
+                <div class="form-group mb-3">
+                    {{ asset_form.exclude.label }}
+                    {{ asset_form.exclude(class="form-control") }}
+                    <small class="text-muted">{{ asset_form.exclude.description }}</small>
+                </div>
+                
+                <div class="form-group mb-3">
+                    {{ asset_form.components.label }}
+                    <div class="checkbox-group">
+                        {% for value, label in asset_form.components.choices %}
+                        <div class="checkbox">
+                            <input type="checkbox" name="components" value="{{ value }}" id="comp_{{ value }}">
+                            <label for="comp_{{ value }}">{{ label }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="form-group mb-3">
+                    {{ asset_form.include_info.label }}
+                    {{ asset_form.include_info(class="form-control") }}
+                </div>
+
+                <!-- Opciones de componentes -->
+                <div class="component-options mb-3">
+                    <h5>Opciones de Componentes</h5>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="disable_join" name="disable_join" {% if asset_form.disable_join.data %}checked{% endif %}>
+                            <label for="disable_join">{{ asset_form.disable_join.label.text }}</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="combine_cpu_ram" name="combine_cpu_ram" {% if asset_form.combine_cpu_ram.data %}checked{% endif %}>
+                            <label for="combine_cpu_ram">{{ asset_form.combine_cpu_ram.label.text }}</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="all_data" name="all_data" {% if asset_form.all_data.data %}checked{% endif %}>
+                            <label for="all_data">{{ asset_form.all_data.label.text }}</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    {{ asset_form.filename.label }}
+                    {{ asset_form.filename(class="form-control") }}
+                    <small class="form-text text-muted">{{ asset_form.filename.description }}</small>
+                </div>
+
+                <button type="submit" name="submit_assets" class="btn btn-primary mt-3">Buscar Activos</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de Resultados -->
+{% if results %}
+<div class="glass-card mt-4">
+    <div class="glass-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Resultados</h4>
+            <form method="POST" class="d-inline">
+                {{ asset_form.csrf_token }}
+                <input type="hidden" name="download" value="true">
+                <input type="hidden" name="ids" value="{{ asset_form.ids.data or '' }}">
+                <input type="hidden" name="exclude" value="{{ asset_form.exclude.data or '' }}">
+                <input type="hidden" name="filename" value="{{ asset_form.filename.data or '' }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% for component in asset_form.components.data or [] %}
+                <input type="hidden" name="components" value="{{ component }}">
+                {% endfor %}
+                {% for info in asset_form.include_info.data or [] %}
+                <input type="hidden" name="include_info" value="{{ info }}">
+                {% endfor %}
+                <input type="hidden" name="disable_join" value="{{ 'y' if asset_form.disable_join.data else '' }}">
+                <input type="hidden" name="combine_cpu_ram" value="{{ 'y' if asset_form.combine_cpu_ram.data else '' }}">
+                <input type="hidden" name="all_data" value="{{ 'y' if asset_form.all_data.data else '' }}">
+                <button type="submit" name="submit_assets" class="btn btn-success">
+                    <i class="fas fa-download me-2"></i>Descargar Excel
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="glass-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        {% for column in results[0].keys() %}
+                        <th>{{ column }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in results %}
+                    <tr>
+                        {% for value in row.values() %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %} 

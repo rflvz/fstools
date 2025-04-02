@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="glass-card">
+    <div class="glass-header">
+        <h1 class="portal-title">Freshservice Asset Management</h1>
+    </div>
+    <div class="glass-body">
+        <p class="lead text-light">Bienvenido a la herramienta de gestión de activos de Freshservice. Esta aplicación te permite:</p>
+        <div class="feature-list">
+            <div class="feature-item">
+                <i class="fas fa-search"></i>
+                <span>Buscar y gestionar activos por IDs específicos</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-filter"></i>
+                <span>Realizar búsquedas avanzadas por diferentes criterios</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-file-excel"></i>
+                <span>Extraer IDs desde archivos Excel</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-download"></i>
+                <span>Exportar resultados en formato Excel</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4 home-features">
+    <div class="col-md-4">
+        <div class="glass-card h-100">
+            <div class="glass-header">
+                <h3><i class="fas fa-fingerprint"></i> Búsqueda por ID</h3>
+            </div>
+            <div class="glass-body">
+                <p>Busca activos específicos utilizando sus identificadores únicos.</p>
+                <a href="{{ url_for('search_id') }}" class="btn btn-primary btn-block">Ir a Búsqueda por ID</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card h-100">
+            <div class="glass-header">
+                <h3><i class="fas fa-filter"></i> Búsqueda por Criterios</h3>
+            </div>
+            <div class="glass-body">
+                <p>Realiza búsquedas avanzadas filtrando por diversos criterios y atributos.</p>
+                <a href="{{ url_for('search_criteria') }}" class="btn btn-primary btn-block">Ir a Búsqueda por Criterios</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card h-100">
+            <div class="glass-header">
+                <h3><i class="fas fa-file-upload"></i> Extraer IDs</h3>
+            </div>
+            <div class="glass-body">
+                <p>Sube archivos Excel para extraer IDs de activos automáticamente.</p>
+                <a href="{{ url_for('upload') }}" class="btn btn-primary btn-block">Ir a Extraer IDs</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
